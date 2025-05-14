@@ -1,0 +1,10 @@
+{
+  "vpc": "VPC principal con DNS y hostname habilitado",
+  "subnets": [
+    "subnet p\u00fablica us-east-1a",
+    "subnet privada us-east-1a"
+  ],
+  "igw": "Internet Gateway para la VPC",
+  "nat": "NAT Gateway con EIP",
+  "routes": "Tablas de ruteo p\u00fablicas y privadas"
+}
