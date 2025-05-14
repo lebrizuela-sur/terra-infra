@@ -14,3 +14,8 @@ variable "vpc_id" {
 variable "allow_from_sg" {
   type = list(string)
 }
+
+variable "tags" {
+  type    = map(string)
+  default = {}
+}
