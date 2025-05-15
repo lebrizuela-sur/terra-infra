@@ -9,7 +9,6 @@ on:
       - ".github/workflows/deploy.yml"
   workflow_dispatch:
 
-
 jobs:
   terraform:
     name: "Terraform Apply Infra Base"
@@ -20,7 +19,10 @@ jobs:
       TF_IN_AUTOMATION: true
       AWS_REGION: us-east-1
       AWS_DEFAULT_REGION: us-east-1
-      # TF_VAR_ prefixed envs si tenés más
+
+    defaults:
+      run:
+        working-directory: infra
 
     steps:
       - name: Checkout código
