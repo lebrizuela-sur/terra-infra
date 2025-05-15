@@ -4,7 +4,7 @@ on:
   push:
     branches: [main]
     paths:
-      - "**/*.tf"
+      - "infra/**.tf"
       - ".github/workflows/deploy.yml"
   workflow_dispatch:
 
@@ -13,6 +13,10 @@ jobs:
     name: "Terraform Apply Infra Base"
     runs-on: ubuntu-latest
 
+    defaults:
+      run:
+        working-directory: infra
+
     env:
       TF_VAR_region: "us-east-1"
       TF_IN_AUTOMATION: true
@@ -20,10 +24,6 @@ jobs:
       AWS_DEFAULT_REGION: us-east-1
       AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
       AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
-
-    defaults:
-      run:
-        working-directory: infra
 
     steps:
       - name: Checkout código
