@@ -1,0 +1,50 @@
+name: "Deploy Infraestructura Base"
+
+on:
+  push:
+    branches:
+      - main
+    paths:
+      - "**/*.tf"
+      - ".github/workflows/deploy.yml"
+  workflow_dispatch:
+
+
+jobs:
+  terraform:
+    name: "Terraform Apply Infra Base"
+    runs-on: ubuntu-latest
+
+    env:
+      TF_VAR_region: "us-east-1"
+      TF_IN_AUTOMATION: true
+      AWS_REGION: us-east-1
+      AWS_DEFAULT_REGION: us-east-1
+      # TF_VAR_ prefixed envs si tenés más
+
+    steps:
+      - name: Checkout código
+        uses: actions/checkout@v4
+
+      - name: Setup Terraform
+        uses: hashicorp/setup-terraform@v3
+        with:
+          terraform_version: 1.7.5
+
+      - name: Inicializar Terraform
+        run: terraform init
+
+      - name: Validar sintaxis
+        run: terraform validate
+
+      - name: Plan Terraform
+        run: terraform plan -out=tfplan
+
+      - name: Aplicar Terraform
+        run: terraform apply -auto-approve tfplan
+        env:
+          AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+
+      - name: Output
+        run: terraform output
