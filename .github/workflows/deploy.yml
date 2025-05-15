@@ -2,7 +2,7 @@ name: "Deploy Infraestructura Base"
 
 on:
   push:
-    branches: [main]
+    branches: [main, develop, qa, predevelop]
     paths:
       - "infra/**.tf"
       - ".github/workflows/deploy.yml"
@@ -12,30 +12,30 @@ jobs:
   terraform:
     name: "Terraform Apply Infra Base"
     runs-on: ubuntu-latest
-    environment: AWS  # Esto hace que use los Environment Secrets definidos bajo "AWS"
+    environment: AWS
 
     defaults:
       run:
-        working-directory: infra  # <- asegúrate que los .tf están en infra/
-
-    env:
-      TF_VAR_region: "us-east-1"
-      TF_IN_AUTOMATION: true
-      AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
-      AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
-      AWS_REGION: us-east-1
-      AWS_DEFAULT_REGION: us-east-1
-      TF_VAR_environment: ${{
-        github.ref_name == 'main' && 'prod' ||
-        github.ref_name == 'develop' && 'dev' ||
-        github.ref_name == 'qa' && 'qa' ||
-        github.ref_name == 'predevelop' && 'predev' ||
-        'unknown'
-      }}
+        working-directory: infra
 
     steps:
       - name: Checkout código
         uses: actions/checkout@v4
+
+      - name: Set environment name
+        id: set-env
+        run: |
+          if [[ "${GITHUB_REF_NAME}" == "main" ]]; then
+            echo "environment=prod" >> "$GITHUB_OUTPUT"
+          elif [[ "${GITHUB_REF_NAME}" == "develop" ]]; then
+            echo "environment=dev" >> "$GITHUB_OUTPUT"
+          elif [[ "${GITHUB_REF_NAME}" == "qa" ]]; then
+            echo "environment=qa" >> "$GITHUB_OUTPUT"
+          elif [[ "${GITHUB_REF_NAME}" == "predevelop" ]]; then
+            echo "environment=predev" >> "$GITHUB_OUTPUT"
+          else
+            echo "environment=unknown" >> "$GITHUB_OUTPUT"
+          fi
 
       - name: Setup Terraform
         uses: hashicorp/setup-terraform@v3
@@ -44,6 +44,13 @@ jobs:
 
       - name: Inicializar Terraform
         run: terraform init
+        env:
+          TF_VAR_region: us-east-1
+          TF_VAR_environment: ${{ steps.set-env.outputs.environment }}
+          AWS_REGION: us-east-1
+          AWS_DEFAULT_REGION: us-east-1
+          AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
 
       - name: Validar sintaxis
         run: terraform validate
