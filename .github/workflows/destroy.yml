@@ -4,22 +4,13 @@ on:
   workflow_dispatch:
 
 jobs:
-  terraform-destroy:
-    name: "Terraform Destroy"
+  terraform:
+    name: "Terraform Destroy Infra Base"
     runs-on: ubuntu-latest
     environment: AWS 
-
     defaults:
       run:
-        working-directory: infra 
-
-    env:
-      TF_VAR_region: "us-east-1"
-      TF_IN_AUTOMATION: true
-      AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
-      AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
-      AWS_REGION: us-east-1
-      AWS_DEFAULT_REGION: us-east-1
+        working-directory: infra
 
     steps:
       - name: Checkout código
@@ -30,14 +21,37 @@ jobs:
         with:
           terraform_version: 1.7.5
 
+      - name: Set environment variable by branch
+        id: set-env
+        run: |
+          if [[ "${GITHUB_REF_NAME}" == "main" ]]; then
+            echo "environment=prod" >> "$GITHUB_OUTPUT"
+          elif [[ "${GITHUB_REF_NAME}" == "develop" ]]; then
+            echo "environment=dev" >> "$GITHUB_OUTPUT"
+          elif [[ "${GITHUB_REF_NAME}" == "qa" ]]; then
+            echo "environment=qa" >> "$GITHUB_OUTPUT"
+          elif [[ "${GITHUB_REF_NAME}" == "predevelop" ]]; then
+            echo "environment=predev" >> "$GITHUB_OUTPUT"
+          else
+            echo "environment=unknown" >> "$GITHUB_OUTPUT"
+          fi
+
       - name: Inicializar Terraform
         run: terraform init
+        env:
+          AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          TF_VAR_environment: ${{ steps.set-env.outputs.environment }}
+          TF_VAR_region: us-east-1
+          AWS_REGION: us-east-1
+          AWS_DEFAULT_REGION: us-east-1
 
-      - name: Validar sintaxis
-        run: terraform validate
-
-      - name: Plan de destrucción
-        run: terraform plan -destroy -out=tfplan
-
-      - name: Ejecutar destrucción
-        run: terraform apply -auto-approve tfplan
+      - name: Destruir Infraestructura
+        run: terraform destroy -auto-approve
+        env:
+          AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          TF_VAR_environment: ${{ steps.set-env.outputs.environment }}
+          TF_VAR_region: us-east-1
+          AWS_REGION: us-east-1
+          AWS_DEFAULT_REGION: us-east-1
