@@ -12,18 +12,19 @@ jobs:
   terraform:
     name: "Terraform Apply Infra Base"
     runs-on: ubuntu-latest
+    environment: AWS  # Esto hace que use los Environment Secrets definidos bajo "AWS"
 
     defaults:
       run:
-        working-directory: infra
+        working-directory: infra  # <- asegúrate que los .tf están en infra/
 
     env:
       TF_VAR_region: "us-east-1"
       TF_IN_AUTOMATION: true
-      AWS_REGION: us-east-1
-      AWS_DEFAULT_REGION: us-east-1
       AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
       AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+      AWS_REGION: us-east-1
+      AWS_DEFAULT_REGION: us-east-1
 
     steps:
       - name: Checkout código
