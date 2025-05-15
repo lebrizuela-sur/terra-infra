@@ -13,7 +13,7 @@ jobs:
     name: "Terraform Apply Infra Base"
     runs-on: ubuntu-latest
     environment: AWS
-
+    
     defaults:
       run:
         working-directory: infra
@@ -22,7 +22,12 @@ jobs:
       - name: Checkout código
         uses: actions/checkout@v4
 
-      - name: Set environment name
+      - name: Setup Terraform
+        uses: hashicorp/setup-terraform@v3
+        with:
+          terraform_version: 1.7.5
+
+      - name: Set environment variable by branch
         id: set-env
         run: |
           if [[ "${GITHUB_REF_NAME}" == "main" ]]; then
@@ -37,29 +42,42 @@ jobs:
             echo "environment=unknown" >> "$GITHUB_OUTPUT"
           fi
 
-      - name: Setup Terraform
-        uses: hashicorp/setup-terraform@v3
-        with:
-          terraform_version: 1.7.5
-
       - name: Inicializar Terraform
         run: terraform init
         env:
-          TF_VAR_region: us-east-1
-          TF_VAR_environment: ${{ steps.set-env.outputs.environment }}
-          AWS_REGION: us-east-1
-          AWS_DEFAULT_REGION: us-east-1
           AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
           AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          TF_VAR_environment: ${{ steps.set-env.outputs.environment }}
+          TF_VAR_region: us-east-1
+          AWS_REGION: us-east-1
+          AWS_DEFAULT_REGION: us-east-1
 
       - name: Validar sintaxis
         run: terraform validate
+        env:
+          TF_VAR_environment: ${{ steps.set-env.outputs.environment }}
 
       - name: Plan Terraform
         run: terraform plan -out=tfplan
+        env:
+          AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          TF_VAR_environment: ${{ steps.set-env.outputs.environment }}
+          TF_VAR_region: us-east-1
+          AWS_REGION: us-east-1
+          AWS_DEFAULT_REGION: us-east-1
 
       - name: Aplicar Terraform
         run: terraform apply -auto-approve tfplan
+        env:
+          AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          TF_VAR_environment: ${{ steps.set-env.outputs.environment }}
+          TF_VAR_region: us-east-1
+          AWS_REGION: us-east-1
+          AWS_DEFAULT_REGION: us-east-1
 
       - name: Output
         run: terraform output
+        env:
+          TF_VAR_environment: ${{ steps.set-env.outputs.environment }}
