@@ -2,8 +2,7 @@ name: "Deploy Infraestructura Base"
 
 on:
   push:
-    branches:
-      - main
+    branches: [main]
     paths:
       - "**/*.tf"
       - ".github/workflows/deploy.yml"
@@ -19,10 +18,8 @@ jobs:
       TF_IN_AUTOMATION: true
       AWS_REGION: us-east-1
       AWS_DEFAULT_REGION: us-east-1
-
-    defaults:
-      run:
-        working-directory: infra
+      AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
+      AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
 
     steps:
       - name: Checkout código
@@ -44,9 +41,6 @@ jobs:
 
       - name: Aplicar Terraform
         run: terraform apply -auto-approve tfplan
-        env:
-          AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
-          AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
 
       - name: Output
         run: terraform output

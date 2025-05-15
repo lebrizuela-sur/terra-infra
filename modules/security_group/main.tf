@@ -19,3 +19,4 @@ resource "aws_security_group" "default" {
 
   tags = var.tags
 }
+
