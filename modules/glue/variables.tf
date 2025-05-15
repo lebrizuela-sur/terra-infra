@@ -13,3 +13,9 @@ variable "default_arguments" {
   type    = map(string)
   default = {}
 }
+
+variable "notebook_path" {
+  description = "Optional path to a Glue notebook (Jupyter)"
+  type        = string
+  default     = null
+}
