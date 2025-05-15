@@ -9,3 +9,7 @@ variable "enable_job_metrics" { type = bool }
 variable "enable_job_insights" { type = bool }
 variable "max_capacity" { type = number }
 variable "schedule_cron_expression" { type = string }
+variable "default_arguments" {
+  type    = map(string)
+  default = {}
+}
