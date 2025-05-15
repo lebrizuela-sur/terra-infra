@@ -15,12 +15,13 @@ resource "aws_glue_job" "job" {
   worker_type       = "G.1X"
 
   default_arguments = merge(
+    var.default_arguments,
     {
       "--job-language" = "python"
       "--TempDir"      = "s3://${var.temp_bucket}/temporary/"
-    },
-    var.default_arguments
+    }
   )
+
 
   execution_property {
     max_concurrent_runs = 1
