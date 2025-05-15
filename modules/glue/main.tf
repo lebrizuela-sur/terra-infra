@@ -10,5 +10,6 @@ resource "aws_glue_job" "job" {
   number_of_workers  = 2
   worker_type        = "G.1X"
   default_arguments = var.default_arguments
+  notebook_path = var.notebook_path
 
 }
