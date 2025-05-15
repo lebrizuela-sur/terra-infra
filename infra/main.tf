@@ -66,3 +66,12 @@ resource "aws_route_table_association" "private_a" {
   subnet_id      = aws_subnet.private_a.id
   route_table_id = aws_route_table.private.id
 }
+
+# Backend remoto (estado)
+terraform {
+  backend "s3" {
+    bucket = "sur-tf-status"
+    key    = "infra/terraform.tfstate"
+    region = "us-east-1"
+  }
+}
