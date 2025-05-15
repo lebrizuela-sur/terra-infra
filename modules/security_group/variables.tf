@@ -11,11 +11,16 @@ variable "vpc_id" {
   type = string
 }
 
-variable "allow_from_sg" {
-  type = list(string)
-}
+
 
 variable "tags" {
   type    = map(string)
   default = {}
+}
+
+
+variable "allow_from_sg" {
+  type        = list(string)
+  default     = []
+  description = "Lista de SGs que tendrán permiso de ingreso"
 }
