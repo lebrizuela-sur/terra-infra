@@ -8,15 +8,17 @@ variable "enable_glue_datacatalog" { type = bool }
 variable "enable_job_metrics" { type = bool }
 variable "enable_job_insights" { type = bool }
 variable "max_capacity" { type = number }
-variable "default_arguments" {
-  type    = map(string)
-  default = {}
-}
 
 variable "notebook_path" {
   description = "Optional path to a Glue notebook (Jupyter)"
   type        = string
   default     = null
+}
+
+
+variable "default_arguments" {
+  description = "Map of default arguments for the Glue job"
+  type        = map(string)
 }
 
 
